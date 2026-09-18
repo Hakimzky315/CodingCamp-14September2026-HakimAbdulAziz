@@ -375,7 +375,7 @@ a  { text-decoration: none; color: inherit; }
 
 .cat-btn {
   cursor: pointer;
-  position: relative; /* B8 FIX: diperlukan agar input[type="radio"] position:absolute tidak keluar batas */
+  position: relative;
 }
 
 .cat-btn input[type="radio"] {
@@ -579,7 +579,7 @@ a  { text-decoration: none; color: inherit; }
 .budget-top .card-title { margin-bottom: 0; }
 
 .budget-input-row .input-wrap {
-  min-width: 0;     /* B9 FIX: cegah overflow di layar kecil */
+  min-width: 0;
   width: 100%;
   max-width: 260px;
 }
