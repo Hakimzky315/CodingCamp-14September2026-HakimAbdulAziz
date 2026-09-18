@@ -19,6 +19,7 @@ Aplikasi pencatat dan pemantau keuangan pribadi berbasis web yang interaktif, re
 - **Desain Responsif & Dark Mode**: Tampilan rapi di layar HP maupun laptop menggunakan CSS Grid & Flexbox, serta mendukung mode gelap/terang.
 
 ---
+<img width="1919" height="901" alt="Cuplikan layar 2026-09-18 200946" src="https://github.com/user-attachments/assets/498a1685-8c8a-439f-8c97-85bf81e933be" />
 
 ## 🛠️ Teknologi yang Digunakan
 
