@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense &amp; Budget Visualizer</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       APP SHELL
+  ══════════════════════════════════════════ -->
+  <div class="app">
+
+    <!-- ── Top Bar ── -->
+    <header class="topbar">
+      <div class="topbar-brand">
+        <svg class="topbar-icon" width="22" height="22" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span class="topbar-title">Expense Visualizer</span>
+      </div>
+      <div class="topbar-actions">
+        <!-- Dark/Light toggle -->
+        <button class="btn-icon" id="themeToggle" aria-label="Ganti tema">
+          <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" style="display:none">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"  x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1"  y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+
+        <!-- Add transaction (mobile) -->
+        <button class="btn-add-fab" id="btnFab" aria-label="Tambah transaksi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5"  y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Main Scroll Area ── -->
+    <div class="main">
+
+      <!-- ── Balance Hero ── -->
+      <section class="balance-hero" aria-label="Ringkasan saldo">
+        <div class="balance-hero-inner">
+          <p class="balance-label">Total Saldo</p>
+          <p class="balance-amount" id="totalBalance">Rp&nbsp;0</p>
+          <div class="balance-pills">
+            <span class="pill pill-income">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+              <span id="totalIncome">Rp&nbsp;0</span>
+            </span>
+            <span class="pill pill-expense">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <polyline points="19 12 12 19 5 12"/>
+              </svg>
+              <span id="totalExpense">Rp&nbsp;0</span>
+            </span>
+          </div>
+        </div>
+        <!-- decorative rings -->
+        <div class="hero-ring ring-1" aria-hidden="true"></div>
+        <div class="hero-ring ring-2" aria-hidden="true"></div>
+      </section>
+
+      <!-- ── Two-column grid (form + chart) ── -->
+      <div class="grid-2col">
+
+        <!-- ── Add Transaction Form ── -->
+        <section class="card" id="formSection" aria-label="Form tambah transaksi">
+          <h2 class="card-title">Tambah Transaksi</h2>
+
+          <form id="txForm" novalidate>
+
+            <!-- Item Name -->
+            <div class="field" id="fldName">
+              <label class="field-label" for="txName">Nama Item</label>
+              <input class="field-input" type="text" id="txName"
+                     placeholder="Contoh: Nasi goreng, Grab…"
+                     autocomplete="off" />
+              <span class="field-err" id="errName" aria-live="polite"></span>
+            </div>
+
+            <!-- Amount -->
+            <div class="field" id="fldAmount">
+              <label class="field-label" for="txAmount">Jumlah (Rp)</label>
+              <div class="input-wrap">
+                <span class="input-prefix" aria-hidden="true">Rp</span>
+                <input class="field-input prefix" type="number" id="txAmount"
+                       placeholder="0" min="1" />
+              </div>
+              <span class="field-err" id="errAmount" aria-live="polite"></span>
+            </div>
+
+            <!-- Category pills -->
+            <div class="field" id="fldCat">
+              <label class="field-label" id="catGroupLabel">Kategori</label>
+              <div class="cat-group" id="catGroup" role="radiogroup" aria-labelledby="catGroupLabel">
+                <!-- diisi oleh JS secara dinamis berdasarkan tipe transaksi -->
+              </div>
+              <span class="field-err" id="errCat" aria-live="polite"></span>
+            </div>
+
+            <!-- Type toggle -->
+            <div class="field" id="fldType">
+              <label class="field-label">Tipe</label>
+              <div class="type-group" role="radiogroup" aria-label="Tipe transaksi">
+                <label class="type-btn expense-btn">
+                  <input type="radio" name="txType" value="expense" id="typeExpense" checked />
+                  <span>↓ Pengeluaran</span>
+                </label>
+                <label class="type-btn income-btn">
+                  <input type="radio" name="txType" value="income" id="typeIncome" />
+                  <span>↑ Pemasukan</span>
+                </label>
+              </div>
+              <span class="field-err" id="errType" aria-live="polite"></span>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5"  y1="12" x2="19" y2="12"/>
+              </svg>
+              Tambah
+            </button>
+          </form>
+        </section>
+
+        <!-- ── Chart ── -->
+        <section class="card chart-card" aria-label="Grafik sebaran transaksi">
+          <div class="chart-header">
+            <h2 class="card-title">Sebaran</h2>
+            <div class="chart-tabs" role="tablist" aria-label="Pilih jenis grafik">
+              <button class="chart-tab active" id="tabExpense" role="tab"
+                      aria-selected="true" data-chart="expense">Pengeluaran</button>
+              <button class="chart-tab" id="tabIncome" role="tab"
+                      aria-selected="false" data-chart="income">Pemasukan</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="expenseChart" role="img"
+                    aria-label="Doughnut chart sebaran transaksi per kategori"></canvas>
+          </div>
+          <ul class="chart-legend" id="chartLegend" aria-label="Legenda chart"></ul>
+        </section>
+      </div>
+
+      <!-- ── Budget Limit ── -->
+      <section class="card budget-card" aria-label="Batas budget">
+        <div class="budget-top">
+          <h2 class="card-title">Batas Budget</h2>
+          <div class="budget-input-row">
+            <label class="field-label sr-only" for="budgetInput">Batas pengeluaran (Rp)</label>
+            <div class="input-wrap">
+              <span class="input-prefix" aria-hidden="true">Rp</span>
+              <input class="field-input prefix" type="number" id="budgetInput"
+                     placeholder="Atur batas…" min="0"
+                     aria-describedby="budgetStatus" />
+            </div>
+          </div>
+        </div>
+        <div class="budget-bar-wrap" id="budgetBarWrap" style="display:none">
+          <div class="budget-progress" role="progressbar"
+               aria-valuemin="0" aria-valuemax="100" id="budgetBar"
+               aria-valuenow="0">
+            <div class="budget-fill" id="budgetFill"></div>
+          </div>
+          <p class="budget-status" id="budgetStatus"></p>
+        </div>
+      </section>
+
+      <!-- ── Transaction List ── -->
+      <section class="card" aria-label="Daftar transaksi">
+        <div class="list-header">
+          <h2 class="card-title">Riwayat</h2>
+          <div class="list-controls">
+            <!-- Sort -->
+            <label class="sr-only" for="sortSelect">Urutkan</label>
+            <select class="select-sm" id="sortSelect" aria-label="Urutkan transaksi">
+              <option value="newest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+              <option value="highest">Tertinggi</option>
+              <option value="lowest">Terendah</option>
+              <option value="cat">Kategori A–Z</option>
+            </select>
+            <!-- Clear all -->
+            <button class="btn-sm btn-danger" id="clearAll"
+                    aria-label="Hapus semua transaksi">Hapus Semua</button>
+          </div>
+        </div>
+
+        <ul class="tx-list" id="txList" aria-label="Daftar transaksi">
+          <li class="tx-empty" id="txEmpty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                 aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <p>Belum ada transaksi</p>
+          </li>
+        </ul>
+      </section>
+
+    </div><!-- .main -->
+  </div><!-- .app -->
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
